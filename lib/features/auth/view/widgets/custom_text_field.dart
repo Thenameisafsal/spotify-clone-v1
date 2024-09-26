@@ -6,6 +6,10 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField();
+    return TextFormField(
+      decoration: InputDecoration(
+        hintText: hint,
+      ),
+    );
   }
 }
