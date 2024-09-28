@@ -1,18 +1,22 @@
 import 'package:client/core/theme/color_palette.dart';
+import 'package:client/core/widgets/loader.dart';
 import 'package:client/features/auth/repositories/auth_remote_repository.dart';
 import 'package:client/features/auth/view/pages/signup_page.dart';
 import 'package:client/features/auth/view/widgets/auth_gradient_button.dart';
 import 'package:client/features/auth/view/widgets/custom_text_field.dart';
+import 'package:client/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 
-class SignInPage extends StatefulWidget {
+class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  ConsumerState<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignInPageState extends ConsumerState<SignInPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
@@ -26,82 +30,91 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = ref.watch(authViewModelProvider)?.isLoading == true;
     // appbar actually provides a back button
     return Scaffold(
         appBar: AppBar(),
-        body: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Sign In",
-                  style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomTextField(
-                  hint: "Email",
-                  controller: emailController,
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                CustomTextField(
-                  hint: "Password",
-                  controller: passwordController,
-                  ObscureText: true,
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                AuthGradientButton(
-                  onTap: () async {
-                    await AuthRemoteRepository().logIn(
-                      email: emailController.text,
-                      password: passwordController.text,
-                    );
-                  },
-                  buttonText: "Sign In",
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SignUpPage(),
+        body: isLoading
+            ? const Loader()
+            : Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Sign In",
+                        style: TextStyle(
+                            fontSize: 50, fontWeight: FontWeight.bold),
                       ),
-                    );
-                    // Navigator.pop(context);
-                  },
-                  child: RichText(
-                    text: TextSpan(
-                      text: "Don't have an account? ",
-                      style: Theme.of(context).textTheme.titleMedium,
-                      children: const [
-                        TextSpan(
-                          text: 'Sign Up',
-                          style: TextStyle(
-                            color: Pallete.gradient2,
-                            fontWeight: FontWeight.bold,
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      CustomTextField(
+                        hint: "Email",
+                        controller: emailController,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      CustomTextField(
+                        hint: "Password",
+                        controller: passwordController,
+                        ObscureText: true,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      AuthGradientButton(
+                        onTap: () async {
+                          final res = await AuthRemoteRepository().logIn(
+                            email: emailController.text,
+                            password: passwordController.text,
+                          );
+                          final val = switch (res) {
+                            Left(value: final l) => l,
+                            Right(value: final r) => r,
+                          };
+                          print(val);
+                        },
+                        buttonText: "Sign In",
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SignUpPage(),
+                            ),
+                          );
+                          // Navigator.pop(context);
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            text: "Don't have an account? ",
+                            style: Theme.of(context).textTheme.titleMedium,
+                            children: const [
+                              TextSpan(
+                                text: 'Sign Up',
+                                style: TextStyle(
+                                  color: Pallete.gradient2,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ));
+              ));
   }
 }
