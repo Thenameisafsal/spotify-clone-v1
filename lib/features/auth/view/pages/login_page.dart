@@ -31,7 +31,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authViewModelProvider)?.isLoading == true;
+    final isLoading = ref.watch(authViewModelProvider.select((val) =>
+        val?.isLoading ==
+        true)); // rebuild only if authviewmodelprovider changes
     ref.listen(
       authViewModelProvider,
       (_, next) {

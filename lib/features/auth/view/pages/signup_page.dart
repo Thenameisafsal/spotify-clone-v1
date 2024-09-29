@@ -32,7 +32,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     // appbar actually provides a back button
-    final isLoading = ref.watch(authViewModelProvider)?.isLoading == true;
+    final isLoading = ref.watch(authViewModelProvider.select((val) =>
+        val?.isLoading ==
+        true)); // rebuild only if authviewmodelprovider changes
     ref.listen(
       authViewModelProvider,
       (_, next) {
