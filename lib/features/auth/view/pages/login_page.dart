@@ -92,15 +92,15 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       ),
                       AuthGradientButton(
                         onTap: () async {
-                          final res = await AuthRemoteRepository().logIn(
-                            email: emailController.text,
-                            password: passwordController.text,
-                          );
-                          final val = switch (res) {
-                            Left(value: final l) => l,
-                            Right(value: final r) => r,
-                          };
-                          print(val);
+                          if (formKey.currentState!.validate()) {
+                            await ref
+                                .read(authViewModelProvider.notifier)
+                                .signInUser(
+                                    email: emailController.text,
+                                    password: passwordController.text);
+                          } else {
+                            showSnackBar(context, 'missing fields!');
+                          }
                         },
                         buttonText: "Sign In",
                       ),
