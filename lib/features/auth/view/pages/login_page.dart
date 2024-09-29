@@ -1,4 +1,5 @@
 import 'package:client/core/theme/color_palette.dart';
+import 'package:client/core/utils.dart';
 import 'package:client/core/widgets/loader.dart';
 import 'package:client/features/auth/repositories/auth_remote_repository.dart';
 import 'package:client/features/auth/view/pages/signup_page.dart';
@@ -31,6 +32,26 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authViewModelProvider)?.isLoading == true;
+    ref.listen(
+      authViewModelProvider,
+      (_, next) {
+        next?.when(
+          data: (data) {
+            // TODO: implement the home page
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => const SignInPage(),
+            //     ),
+            //   );
+          },
+          error: (error, st) {
+            showSnackBar(context, error.toString());
+          },
+          loading: () {},
+        );
+      },
+    );
     // appbar actually provides a back button
     return Scaffold(
         appBar: AppBar(),

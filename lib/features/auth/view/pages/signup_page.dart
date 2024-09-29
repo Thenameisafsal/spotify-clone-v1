@@ -1,4 +1,5 @@
 import 'package:client/core/theme/color_palette.dart';
+import 'package:client/core/utils.dart';
 import 'package:client/core/widgets/loader.dart';
 import 'package:client/features/auth/view/pages/login_page.dart';
 import 'package:client/features/auth/view/widgets/auth_gradient_button.dart';
@@ -37,14 +38,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       (_, next) {
         next?.when(
           data: (data) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                const SnackBar(
-                  content: Text(
-                      "Account has been created successfully! Please log in using the account."),
-                ),
-              );
+            showSnackBar(
+              context,
+              "Account has been created successfully! Please log in using the account.",
+            );
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -53,15 +50,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
             );
           },
           error: (error, st) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(
-                    error.toString(),
-                  ),
-                ),
-              );
+            showSnackBar(context, error.toString());
           },
           loading: () {},
         );

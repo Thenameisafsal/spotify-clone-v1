@@ -6,9 +6,11 @@ part 'auth_viewmodel.g.dart';
 
 @riverpod
 class AuthViewModel extends _$AuthViewModel {
-  final AuthRemoteRepository _authRemoteRepository = AuthRemoteRepository();
+  late AuthRemoteRepository _authRemoteRepository;
   @override
   AsyncValue<UserModel>? build() {
+    _authRemoteRepository = ref.watch(
+        authRemoteRepositoryProvider); // rebuild every time the provider changes
     return null;
   }
 
