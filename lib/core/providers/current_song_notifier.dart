@@ -7,6 +7,7 @@ part 'current_song_notifier.g.dart';
 @riverpod
 class CurrentSongNotifier extends _$CurrentSongNotifier {
   AudioPlayer? audioPlayer;
+  bool isPlaying = false;
   SongModel? build() {
     return null;
   }
@@ -15,7 +16,17 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
     audioPlayer = AudioPlayer();
     final audioSource = AudioSource.uri(Uri.parse(song.song_url));
     await audioPlayer!.setAudioSource(audioSource);
-    await audioPlayer!.play();
+    audioPlayer!.play();
     state = song;
+  }
+
+  void playPause() {
+    if (isPlaying) {
+      audioPlayer?.pause();
+    } else {
+      audioPlayer?.play();
+    }
+    isPlaying = !isPlaying;
+    state = state?.copyWith(hex_code: state?.hex_code);
   }
 }
