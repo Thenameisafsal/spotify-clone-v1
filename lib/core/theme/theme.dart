@@ -19,5 +19,8 @@ class AppTheme {
       // focused border specifies the styles to be applied on focus
       focusedBorder: _border(Pallete.gradient2),
     ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Pallete.backgroundColor,
+    ),
   );
 }

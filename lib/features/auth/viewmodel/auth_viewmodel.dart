@@ -37,7 +37,8 @@ class AuthViewModel extends _$AuthViewModel {
     );
     // pattern matching
     final val = switch (res) {
-      Left(value: final l) => state = AsyncValue.error(l, StackTrace.current),
+      Left(value: final l) => state =
+          AsyncValue.error(l.error, StackTrace.current),
       Right(value: final r) => state = AsyncValue.data(r)
     };
     print(val);
@@ -54,7 +55,8 @@ class AuthViewModel extends _$AuthViewModel {
     );
     // pattern matching
     final val = switch (res) {
-      Left(value: final l) => state = AsyncValue.error(l, StackTrace.current),
+      Left(value: final l) => state =
+          AsyncValue.error(l.error, StackTrace.current),
       Right(value: final r) => _loginSuccess(r),
     };
   }
@@ -71,7 +73,8 @@ class AuthViewModel extends _$AuthViewModel {
     if (token != null) {
       final res = await _authRemoteRepository.getCurrentUserData(token);
       final val = switch (res) {
-        Left(value: final l) => state = AsyncValue.error(l, StackTrace.current),
+        Left(value: final l) => state =
+            AsyncValue.error(l.error, StackTrace.current),
         Right(value: final r) => state = _getDataSuccess(r),
       };
       return val.value;
