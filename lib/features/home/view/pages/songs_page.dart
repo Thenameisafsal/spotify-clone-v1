@@ -26,7 +26,7 @@ class SongsPage extends ConsumerWidget {
           ),
           ref.watch(getAllSongsProvider).when(
                 data: (songs) {
-                  return Container(
+                  return SizedBox(
                     height: 260,
                     child: ListView.builder(
                         scrollDirection: Axis.horizontal,

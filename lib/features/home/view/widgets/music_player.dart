@@ -1,5 +1,6 @@
 import 'package:client/core/providers/current_song_notifier.dart';
 import 'package:client/core/theme/color_palette.dart';
+import 'package:client/core/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,15 +11,39 @@ class MusicPlayer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentSong = ref.watch(currentSongNotifierProvider);
-    return Padding(
+    final songNotifier = ref.read(currentSongNotifierProvider.notifier);
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            hexToColor(currentSong!.hex_code),
+            const Color(0xff121212),
+          ],
+        ),
+      ),
       child: Scaffold(
+        backgroundColor: Pallete.transparentColor,
         appBar: AppBar(
-          leading: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Image.asset(
-              'assets/images/pull-down-arrow.png',
-              color: Pallete.whiteColor,
+          backgroundColor: Pallete.transparentColor,
+          leading: Transform.translate(
+            offset: const Offset(-15, 0),
+            child: InkWell(
+              highlightColor: Pallete.transparentColor,
+              splashColor: Pallete.transparentColor,
+              focusColor: Pallete.transparentColor,
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Image.asset(
+                  'assets/images/pull-down-arrow.png',
+                  color: Pallete.whiteColor,
+                ),
+              ),
             ),
           ),
         ),
@@ -28,15 +53,19 @@ class MusicPlayer extends ConsumerWidget {
               flex: 5,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 30.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        currentSong!.thumbnail_url,
+                child: Hero(
+                  tag:
+                      'music-image', // hero and tag are used to animate two entities with same tag
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(
+                          currentSong.thumbnail_url,
+                        ),
+                        fit: BoxFit.cover,
                       ),
-                      fit: BoxFit.cover,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
@@ -73,53 +102,81 @@ class MusicPlayer extends ConsumerWidget {
                       ),
                       IconButton(
                         onPressed: () {},
-                        icon: const Icon(CupertinoIcons.heart),
+                        icon: const Icon(
+                          CupertinoIcons.heart,
+                          color: Pallete.whiteColor,
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            Column(
-              children: [
-                SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: Pallete.whiteColor,
-                    inactiveTrackColor: Pallete.whiteColor.withOpacity(0.117),
-                    thumbColor: Pallete.whiteColor,
-                    trackHeight: 4,
-                    overlayShape: SliderComponentShape.noOverlay,
-                  ),
-                  child: Slider(
-                    value: 0.5,
-                    onChanged: (val) {},
-                  ),
-                ),
-              ],
-            ),
-            const Row(
-              children: [
-                Text(
-                  '0:05',
-                  style: TextStyle(
-                    color: Pallete.subtitleText,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-                Expanded(
-                  child: SizedBox(),
-                ),
-                Text(
-                  '0:10',
-                  style: TextStyle(
-                    color: Pallete.subtitleText,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox(),
+            StreamBuilder(
+                stream: songNotifier.audioPlayer!.positionStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox();
+                  }
+                  final position =
+                      snapshot.data; // current position in duration
+                  final duration = songNotifier
+                      .audioPlayer!.duration; // total length of song
+                  double sliderValue = 0.0;
+                  if (duration != null && position != null) {
+                    sliderValue =
+                        position.inMilliseconds / duration.inMilliseconds;
+                  }
+                  return Column(
+                    children: [
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: Pallete.whiteColor,
+                          inactiveTrackColor:
+                              Pallete.whiteColor.withOpacity(0.117),
+                          thumbColor: Pallete.whiteColor,
+                          trackHeight: 4,
+                          overlayShape: SliderComponentShape.noOverlay,
+                        ),
+                        child: Slider(
+                          value: sliderValue,
+                          min: 0,
+                          max: 1,
+                          onChanged: (val) {
+                            sliderValue =
+                                val; // while slider is slided by use, without being released
+                          },
+                          // after releasing slider
+                          onChangeEnd: songNotifier.seek,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            '${position?.inMinutes}:${(position?.inSeconds ?? 0) < 10 ? '0${position?.inSeconds}' : '${position?.inSeconds}'}',
+                            style: const TextStyle(
+                              color: Pallete.subtitleText,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                          const Expanded(
+                            child: SizedBox(),
+                          ),
+                          Text(
+                            '${duration?.inMinutes}:${(duration?.inSeconds ?? 0) < 10 ? '0${duration?.inSeconds}' : '${duration?.inSeconds}'}',
+                            style: const TextStyle(
+                              color: Pallete.subtitleText,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }),
             const SizedBox(
               height: 15,
             ),
@@ -141,8 +198,10 @@ class MusicPlayer extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () {},
-                  icon: const Icon(CupertinoIcons.play_circle_fill),
+                  onPressed: songNotifier.playPause,
+                  icon: Icon(songNotifier.isPlaying
+                      ? CupertinoIcons.pause_circle_fill
+                      : CupertinoIcons.play_circle_fill),
                   iconSize: 80,
                   color: Pallete.whiteColor,
                 ),
@@ -183,7 +242,7 @@ class MusicPlayer extends ConsumerWidget {
                   ),
                 ),
               ],
-            ),
+            ), //08:20:49 to be continued from
           ],
         ),
       ),
