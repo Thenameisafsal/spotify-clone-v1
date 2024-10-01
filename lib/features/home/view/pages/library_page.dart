@@ -78,6 +78,6 @@ class LibraryPage extends ConsumerWidget {
           );
         },
         loading: () => const Loader());
-    return const Placeholder();
+    return Scaffold();
   }
 }
