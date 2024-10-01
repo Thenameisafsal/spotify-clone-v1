@@ -43,7 +43,8 @@ class MusicSlab extends ConsumerWidget {
       },
       child: Stack(
         children: [
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 1000),
             height: 66,
             width: MediaQuery.of(context).size.width - 16,
             decoration: BoxDecoration(
